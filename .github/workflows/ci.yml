@@ -30,7 +30,7 @@ jobs:
   # job's runtime.
   check:
     name: check (py3.11, quality + coverage)
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
@@ -55,7 +55,7 @@ jobs:
   # the quality gate's runtime to the critical path.
   build:
     name: build (py3.11)
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
@@ -85,17 +85,17 @@ jobs:
       matrix:
         include:
           - name: linux py3.12
-            os: blacksmith-2vcpu-ubuntu-2404
+            os: ubuntu-24.04
             python: python3
             venv-python: .venv/bin/python
             python-version: "3.12"
           - name: macos py3.13
-            os: blacksmith-6vcpu-macos-15
+            os: macos-15
             python: python3
             venv-python: .venv/bin/python
             python-version: "3.13"
           - name: windows py3.13
-            os: blacksmith-2vcpu-windows-2025
+            os: windows-2025
             python: python
             venv-python: .\.venv\Scripts\python.exe
             python-version: "3.13"
@@ -121,7 +121,7 @@ jobs:
   # once instead of once per Python version.
   integration:
     name: integration (py3.13)
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
