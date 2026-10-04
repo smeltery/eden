@@ -73,7 +73,12 @@ def test_agent_exec_span_carries_iteration_index(
     )
     exec_spans = [s for s in captured_spans.get_finished_spans() if s.name == "eden.agent.exec"]
     assert len(exec_spans) == 2
-    indexes = sorted(int((s.attributes or {})["iteration.index"]) for s in exec_spans)  # type: ignore[arg-type]
+    indexes = []
+    for span in exec_spans:
+        index = (span.attributes or {})["iteration.index"]
+        assert isinstance(index, int)
+        indexes.append(index)
+    indexes.sort()
     assert indexes == [0, 1]
 
 
