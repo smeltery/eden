@@ -48,12 +48,13 @@ def create_sandbox(
 
     ``copy_to_worktree`` copies host-relative paths into the worktree before sandbox boot.
 
-    ``hooks`` runs ``host.on_worktree_ready``, ``sandbox.on_sandbox_ready``,
-    and ``*.on_close`` from :meth:`Sandbox.close`.
+    ``hooks`` runs creation hooks and ``*.on_close`` from :meth:`Sandbox.close`.
 
     ``timeouts`` caps the carve's git plumbing and worktree teardown via
     ``Timeouts.git_setup``. Per-run deadlines are passed to each ``sb.run(...)``.
     """
+    from eden.orchestrator._setup import _resolve_cwd
+
     if branch is not None and branch_strategy is not None:
         raise ValueError("branch and branch_strategy are mutually exclusive")
     if branch_strategy is not None and base_branch is not None:
@@ -95,7 +96,7 @@ def create_sandbox(
         if copy_to_worktree and strategy.tag == "head":
             raise_copy_to_head_worktree_error(branch_strategy="branch_strategy 'head'")
 
-        host_repo_path = Path.cwd()
+        host_repo_path = _resolve_cwd(cwd)
         wt = create_worktree(
             host_repo_path=host_repo_path,
             strategy=strategy,
@@ -147,8 +148,7 @@ def create_sandbox(
             finally:
                 raise
     except Exception:
-        # A caller-provided worktree outlives this sandbox by design.
-        # Report but suppress cleanup failures so they do not replace creation errors.
+        # Only close owned worktrees; preserve the original error if cleanup fails.
         if owns_worktree:
             try:
                 wt.close()
@@ -160,7 +160,7 @@ def create_sandbox(
         worktree=wt,
         handle=handle,
         sandbox_provider=sandbox,
-        cwd=cwd,
+        cwd=host_repo_path,
         owns_worktree=owns_worktree,
         hooks=resolved_hooks,
         create_env=combined_env,

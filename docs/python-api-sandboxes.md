@@ -39,6 +39,10 @@ with eden.create_worktree(branch="eden/feature/x") as wt:
         s.run(agent=eden.claude_code("..."), prompt_file="review.md")
 ```
 
+`cwd` selects the host repository for worktrees, configuration, and git operations;
+relative paths resolve against the process working directory. With `worktree=`,
+the supplied worktree determines the repository.
+
 `hooks` runs `host.on_worktree_ready` after `copy_to_worktree`, `sandbox.on_sandbox_ready` after provider creation, and `*.on_close` when `Sandbox.close()` runs.
 
 `copy_to_worktree` (when supplied) seeds host-relative files into the worktree before the sandbox boots, with the same semantics as on [`run()`](python-api-entrypoints.md#run). The copy happens once at `create_sandbox()` time, not on every subsequent `sb.run()`. Incompatible with `BranchStrategy.head()`.
