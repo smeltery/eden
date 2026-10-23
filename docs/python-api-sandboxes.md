@@ -45,7 +45,7 @@ with eden.create_worktree(branch="eden/feature/x") as wt:
 
 `timeouts` caps the one-time carve's git plumbing via `Timeouts.git_setup` (reused by `Sandbox.close()` for the teardown `git worktree remove`). Per-run deadlines like `iteration_step` are passed separately to each [`Sandbox.run(timeouts=...)`](#sandboxrun).
 
-The returned `Sandbox` is a dataclass with `.worktree`, `.handle`, `.sandbox_provider`, `.cwd`, `.owns_worktree`, plus `.exec(...)` / `.run(...)` / `.resume(...)` / `.fork(...)` methods. `Sandbox.close()` returns a [`CloseResult`](python-api-results.md#closeresult): managed sandboxes report whether their worktree was removed or preserved; caller-owned worktree sandboxes report `released_only`. It also doubles as a context manager: `with create_sandbox(...) as s:` closes the handle, and the worktree too when the sandbox carved it itself (`owns_worktree=True`; `False` for caller-provided worktrees).
+The returned `Sandbox` is a dataclass with `.worktree`, `.handle`, `.sandbox_provider`, `.cwd`, `.owns_worktree`, plus `.exec(...)` / `.interactive(...)` / `.run(...)` / `.resume(...)` / `.fork(...)` methods. `Sandbox.close()` returns a [`CloseResult`](python-api-results.md#closeresult): managed sandboxes report whether their worktree was removed or preserved; caller-owned worktree sandboxes report `released_only`. It also doubles as a context manager: `with create_sandbox(...) as s:` closes the handle, and the worktree too when the sandbox carved it itself (`owns_worktree=True`; `False` for caller-provided worktrees).
 
 ## `Sandbox.exec(...)`
 
@@ -58,6 +58,26 @@ if not result.ok:
 ```
 
 Keyword options mirror `SandboxHandle.exec(...)`: `on_line`, `cwd`, `env`, `timeout`, and `stdin`, plus `sudo=True` to run through `sudo -E -- sh -c` inside the sandbox. `cwd` defaults to the provider handle's sandbox-side repository path (for example, `/workspace` in Docker and Podman), not the host worktree path. Non-zero exit codes are returned, not raised; call `result.check()` for strict behavior.
+
+## `Sandbox.interactive(...)`
+
+Attach an agent's TTY to the existing container and branch:
+
+```python
+with eden.create_sandbox(sandbox=docker_provider(...), branch="eden/task") as s:
+    s.run(agent=eden.claude_code("..."), prompt="Implement the task.")
+    result = s.interactive(agent=eden.claude_code("..."), prompt="Walk me through the changes.")
+    print(result.exit_code)
+```
+
+Accepts `agent`, optional `prompt` or `prompt_file`, `prompt_args`, `env`,
+`name`, `collect_args`, and `signal`. Returns `InteractiveResult`, including
+nonzero exit codes. Creation, caller, and agent environment settings are merged;
+conflicting values raise `EnvMergeError`. Prompt rendering and cancellation
+follow `interactive()`. The provider must expose `interactive_exec`.
+The existing handle and worktree remain open, including on errors; creation and
+close hooks run only at their normal lifecycle boundaries. No iteration loop,
+automatic commit, or transcript capture runs during the interactive call.
 
 ## `Sandbox.run(...)`
 
