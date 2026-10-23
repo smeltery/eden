@@ -46,12 +46,12 @@ jobs:
 
 ## Authentication
 
-The action forwards three env vars to `eden run` if they're set in the calling workflow's `env:` block: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GH_TOKEN`. Set whichever your agent + backlog combination needs:
+The action forwards four env vars to `eden run` if they're set in the calling workflow's `env:` block: `ANTHROPIC_API_KEY`, `CODEX_API_KEY`, `OPENAI_API_KEY`, `GH_TOKEN`. Set whichever your agent + backlog combination needs:
 
 | Combination | Required env vars |
 |---|---|
 | `agent: claude-code` | `ANTHROPIC_API_KEY` |
-| `agent: codex` | `OPENAI_API_KEY` |
+| `agent: codex` | `CODEX_API_KEY` |
 | `backlog: github` | `GH_TOKEN` (use `secrets.GITHUB_TOKEN` for repo-scoped access) |
 | `backlog: linear` | `LINEAR_API_KEY` (set as `env:` on the step; passed through `gh action`) |
 | `backlog: jira` | `JIRA_API_TOKEN` and `JIRA_API_HOST` |

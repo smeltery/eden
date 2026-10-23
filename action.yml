@@ -73,6 +73,7 @@ runs:
       env:
         # Forward common API keys when set in the calling workflow's secrets.
         ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY }}
+        CODEX_API_KEY: ${{ env.CODEX_API_KEY }}
         OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
         GH_TOKEN: ${{ env.GH_TOKEN }}
       run: |

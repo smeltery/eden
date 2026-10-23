@@ -16,6 +16,7 @@ from eden.logging._config import Logging
 from eden.providers._protocols import SandboxHandle, SandboxProvider
 from eden.providers._types import ExecResult
 from eden.sandboxes._duration import maybe_seconds, seconds
+from eden.sandboxes._interactive import _SandboxInteractive
 from eden.sandboxes._sandbox_continue import continue_sandbox_session
 from eden.sandboxes._sandbox_lifecycle import close_sandbox
 from eden.sandboxes._sandbox_run import validate_sandbox_run_options
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class Sandbox:
+class Sandbox(_SandboxInteractive):
     worktree: WorktreeHandle
     handle: SandboxHandle
     sandbox_provider: SandboxProvider
@@ -38,7 +39,6 @@ class Sandbox:
     create_env: Mapping[str, str] = field(default_factory=dict)
     timeouts: Timeouts = field(default_factory=Timeouts)
     _last_session_id: str | None = field(default=None, repr=False, compare=False)
-    """Most recent captured session id for no-argument ``resume`` / ``fork``."""
 
     def __enter__(self) -> Sandbox:
         return self

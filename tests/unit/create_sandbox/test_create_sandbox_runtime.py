@@ -55,9 +55,9 @@ def test_sandbox_is_context_manager(tmp_git_repo: Path, monkeypatch: pytest.Monk
 def test_cwd_stored_on_sandbox(tmp_git_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_git_repo)
     p = StubProvider()
-    s = create_sandbox(sandbox=p, cwd=Path("/some/cwd"))
+    s = create_sandbox(sandbox=p, cwd=tmp_git_repo)
     try:
-        assert s.cwd == Path("/some/cwd")
+        assert s.cwd == tmp_git_repo.resolve()
     finally:
         s.close()
 
@@ -120,7 +120,7 @@ def test_sandbox_exec_explicit_cwd_overrides_sandbox_cwd(
 ) -> None:
     monkeypatch.chdir(tmp_git_repo)
     p = StubProvider()
-    s = create_sandbox(sandbox=p, cwd=Path("/repo/subdir"))
+    s = create_sandbox(sandbox=p, cwd=tmp_git_repo)
     try:
         handle = s.handle
         assert isinstance(handle, StubHandle)

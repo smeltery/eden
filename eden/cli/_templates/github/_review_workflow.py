@@ -8,12 +8,14 @@ REVIEW_WORKFLOW = r"""\
 name: Eden Agent Review
 
 on:
-  pull_request_target:
+  pull_request:
     types: [labeled]
 
 jobs:
   review:
-    if: github.event.label.name == 'agent:review'
+    if: >-
+      github.event.label.name == 'agent:review' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
@@ -64,7 +66,7 @@ jobs:
       - name: Run reviewer
         env:
           ANTHROPIC_API_KEY: ${{{{ secrets.ANTHROPIC_API_KEY }}}}
-          OPENAI_API_KEY: ${{{{ secrets.OPENAI_API_KEY }}}}
+          CODEX_API_KEY: ${{{{ secrets.CODEX_API_KEY }}}}
           REVIEW_OUTPUT: ${{{{ runner.temp }}}}/review_payload.json
           REVIEW_REPLIES: ${{{{ runner.temp }}}}/review_replies.json
         run: python .eden/github/review_pr.py

@@ -125,7 +125,7 @@ jobs:
         if: steps.shape.outputs.proceed == 'true' && steps.preflight.outputs.refused != 'true'
         env:
           ANTHROPIC_API_KEY: ${{{{ secrets.ANTHROPIC_API_KEY }}}}
-          OPENAI_API_KEY: ${{{{ secrets.OPENAI_API_KEY }}}}
+          CODEX_API_KEY: ${{{{ secrets.CODEX_API_KEY }}}}
         run: python .eden/github/implement_issue.py
 
       - name: Push branch
