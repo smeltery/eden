@@ -41,7 +41,7 @@ def test_render_github_agent_workflows_exact_github_output() -> None:
         ".env.example",
         ".gitignore",
     }
-    assert _fingerprint(files) == "4e281b501d1346e9037cf397a4635f21ccb310170603a6ad83ee5f1820e932b6"
+    assert _fingerprint(files) == "8fa2bf80fc88773b3a4e2f97c0638bc5bdd8c6130a558cdb82c0290f5e25e969"
 
 
 def test_render_github_agent_workflows_exact_custom_output() -> None:
@@ -53,4 +53,21 @@ def test_render_github_agent_workflows_exact_custom_output() -> None:
         backlog=get_backlog_manager("custom"),
     )
 
-    assert _fingerprint(files) == "a67738b1099bc61b78ff3d0ae88c2930bcac9118c4ee48cbfdd634d78a5ce37f"
+    assert _fingerprint(files) == "185a06b35dd78f722d5f17e6bf6bb0756747351e96ca33f4ae743f80fa5bf664"
+
+
+def test_review_uses_unprivileged_same_repository_event() -> None:
+    files = render_github_agent_workflows(
+        sandbox="docker",
+        agent="codex",
+        model="m",
+        image_name="eden:test",
+        backlog=get_backlog_manager("github"),
+    )
+    workflow = files["../.github/workflows/eden-agent-review.yml"]
+    assert "\n  pull_request:\n" in workflow
+    assert "pull_request_target" not in workflow
+    assert "github.event.pull_request.head.repo.full_name == github.repository" in workflow
+    assert "CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}" in workflow
+    assert "CODEX_API_KEY=" in files[".env.example"]
+    assert "OPENAI_API_KEY" not in files[".env.example"]

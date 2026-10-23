@@ -20,7 +20,7 @@ def test_header_starts_the_body() -> None:
 
 def test_known_agent_appends_its_block() -> None:
     out = render_env_example(agent="codex", backlog_lines="")
-    assert "OPENAI_API_KEY" in out
+    assert "CODEX_API_KEY" in out
 
 
 def test_unknown_agent_emits_header_only() -> None:

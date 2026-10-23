@@ -47,7 +47,12 @@ Create these labels in the repository:
 - `agent:blocked`
 - `agent:in-progress`
 
-Configure the relevant secrets for your selected agent, such as `ANTHROPIC_API_KEY` for Claude Code or `OPENAI_API_KEY` for Codex. If `GITHUB_TOKEN` cannot re-trigger workflows in your repository policy, add `AGENT_PAT` with contents, issues, and pull-request write permissions.
+Configure the relevant secrets for your selected agent, such as `ANTHROPIC_API_KEY` for Claude Code or `CODEX_API_KEY` for Codex. If `GITHUB_TOKEN` cannot re-trigger workflows in your repository policy, add `AGENT_PAT` with contents, issues, and pull-request write permissions.
+
+Review automation uses `pull_request` and accepts only branches in the same
+repository. Fork pull requests must be reviewed manually; the scaffold does not
+run their code with repository credentials. Re-run `eden init` to regenerate an
+existing review workflow, or replace its trigger and add the same-repository guard.
 
 ### Review Output
 

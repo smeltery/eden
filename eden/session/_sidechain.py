@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 
 from eden.session._branch import sanitize_branch
 from eden.session._slug import claude_projects_slug
 from eden.session._store import write_session_copy
+
+_logger = logging.getLogger(__name__)
 
 
 def _is_sidechain_transcript(path: Path) -> bool:
@@ -46,7 +49,15 @@ def capture_sidechain_sessions(
         return []
     safe_branch = sanitize_branch(branch)
     captured: list[Path] = []
-    for src in sorted(slug_dir.glob("*.jsonl")):
+    # Session-scoped files need no content marker: newer agents can omit it.
+    nested_dir = slug_dir / main_session_id / "subagents"
+    try:
+        candidates = [(src, False) for src in sorted(slug_dir.glob("*.jsonl"))]
+        candidates.extend((src, True) for src in sorted(nested_dir.glob("agent-*.jsonl")))
+    except OSError:
+        _logger.warning("Could not list Claude subagent transcripts", exc_info=True)
+        return []
+    for src, nested in candidates:
         if src.stem == main_session_id:
             continue
         try:
@@ -54,14 +65,18 @@ def capture_sidechain_sessions(
                 continue
         except OSError:
             continue
-        if not _is_sidechain_transcript(src):
+        if not nested and not _is_sidechain_transcript(src):
             continue
         dest = (
             host_repo_path
             / ".eden"
             / "sessions"
             / safe_branch
-            / f"iter-{iteration}-sub-{src.stem}.jsonl"
+            / (
+                f"iter-{iteration}-{main_session_id}-sub-{src.stem}.jsonl"
+                if nested
+                else f"iter-{iteration}-sub-{src.stem}.jsonl"
+            )
         )
         try:
             write_session_copy(
@@ -70,7 +85,8 @@ def capture_sidechain_sessions(
                 sandbox_prefix=sandbox_cwd.as_posix(),
                 host_prefix=str(host_repo_path),
             )
-        except OSError:
+        except (OSError, UnicodeError):
+            _logger.warning("Could not capture Claude subagent transcript %s", src, exc_info=True)
             continue
         captured.append(dest)
     return captured

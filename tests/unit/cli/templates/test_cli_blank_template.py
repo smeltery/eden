@@ -134,7 +134,7 @@ def test_env_example_documents_anthropic_and_openai_keys() -> None:
     assert "Copy this file to .eden/.env" in env
     assert "CLAUDE_CODE_OAUTH_TOKEN" in env
     assert "ANTHROPIC_API_KEY" in env
-    assert "OPENAI_API_KEY" in env
+    assert "CODEX_API_KEY" in env
 
 
 def test_prompt_md_mentions_substitution_syntax() -> None:

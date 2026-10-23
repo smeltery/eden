@@ -66,7 +66,10 @@ subagent/workflow transcripts written as sibling `.jsonl` files with
 `isSidechain: true` entries. Each is path-rewritten into
 `.eden/sessions/<branch>/iter-<n>-sub-<id>.jsonl`. The sweep is scoped to the
 run by file modification time, so a reused sandbox slug does not pull in stale
-transcripts, and sub-capture failures do not abort the run.
+transcripts. Session-scoped `<id>/subagents/agent-*.jsonl` files are also
+captured, without requiring an `isSidechain` marker, as
+`iter-<n>-<session-id>-sub-<agent-id>.jsonl`. Nested files belonging to other sessions
+are excluded. Sub-capture failures log a warning and do not abort the run.
 
 To resume a captured session, pass `run(..., resume_session=<id>)`; Eden appends
 `--resume <id>` to the argv. Resume requires `max_iterations=1`; otherwise
